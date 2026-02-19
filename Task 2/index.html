@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>To-Do List App</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+body {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: white;   
+}
+.container {
+  width: 400px;
+  background: #f0f4ff;   
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+h2 {
+  text-align: center;
+  margin-bottom: 15px;
+  color: #333;
+}
+.input-section {
+  display: flex;
+  margin-bottom: 15px;
+}
+input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px 0 0 6px;
+  outline: none;
+}
+button {
+  padding: 8px 12px;
+  border: none;
+  background: #4CAF50;
+  color: white;
+  cursor: pointer;
+  border-radius: 0 6px 6px 0;
+}
+button:hover {
+  background: #45a049;
+}
+ul {
+  list-style: none;
+}
+li {
+  background: white;
+  padding: 10px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+/* Left side */
+.task-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.circle {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #0b0b0b;  
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  transition: 0.2s;
+}
+.circle.completed {
+  background: white;
+}
+.circle.completed::after {
+  content: "✔";
+  color: #003366; 
+}
+.completed-text {
+  text-decoration: line-through;
+  color: gray;
+}
+.delete-btn {
+  background: red;
+  padding: 4px 8px;
+  border-radius: 5px;
+  font-size: 12px;
+}
+.delete-btn:hover {
+  background: darkred;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h2>To-Do List</h2>
+  <div class="input-section">
+    <input type="text" id="taskInput" placeholder="Enter task...">
+    <button id="addBtn">Add</button>
+  </div>
+  <ul id="taskList"></ul>
+</div>
+<script>
+const taskInput = document.getElementById("taskInput");
+const addBtn = document.getElementById("addBtn");
+const taskList = document.getElementById("taskList");
+document.addEventListener("DOMContentLoaded", loadTasks);
+addBtn.addEventListener("click", addTask);
+function addTask() {
+  const text = taskInput.value.trim();
+  if (text === "") return;
+  const task = { text: text, completed: false };
+  const tasks = getTasks();
+  tasks.push(task);
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+  renderTask(task);
+  taskInput.value = "";
+}
+function renderTask(task) {
+  const li = document.createElement("li");
+  const leftDiv = document.createElement("div");
+  leftDiv.classList.add("task-left");
+  const circle = document.createElement("div");
+  circle.classList.add("circle");
+  const span = document.createElement("span");
+  span.textContent = task.text;
+  if (task.completed) {
+    circle.classList.add("completed");
+    span.classList.add("completed-text");
+  }
+  circle.addEventListener("click", function () {
+    circle.classList.toggle("completed");
+    span.classList.toggle("completed-text");
+    updateStorage();
+  });
+  leftDiv.appendChild(circle);
+  leftDiv.appendChild(span);
+  const deleteBtn = document.createElement("button");
+  deleteBtn.textContent = "Delete";
+  deleteBtn.classList.add("delete-btn");
+  deleteBtn.addEventListener("click", function () {
+    li.remove();
+    updateStorage();
+  });
+  li.appendChild(leftDiv);
+  li.appendChild(deleteBtn);
+  taskList.appendChild(li);
+}
+function getTasks() {
+  return JSON.parse(localStorage.getItem("tasks")) || [];
+}
+function loadTasks() {
+  const tasks = getTasks();
+  tasks.forEach(task => renderTask(task));
+}
+function updateStorage() {
+  const tasks = [];
+  document.querySelectorAll("#taskList li").forEach(li => {
+    tasks.push({
+      text: li.querySelector("span").textContent,
+      completed: li.querySelector(".circle").classList.contains("completed")
+    });
+  });
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+}
+</script>
+</body>
+</html>
